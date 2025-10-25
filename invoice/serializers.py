@@ -32,19 +32,14 @@ class ProductSerializer(serializers.Serializer):
 class InvoiceSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     ref_number = serializers.CharField(read_only=True)
-    customer = serializers.IntegerField()  # input: customer ID
+    customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
     items = serializers.ListField(child=serializers.DictField())
     total = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     status = serializers.ChoiceField(choices=[('Pending','Pending'),('Paid','Paid')], default='Pending')
     created_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        customer_id = validated_data.get('customer')
-        try:
-            customer = Customer.objects.get(id=customer_id)
-        except Customer.DoesNotExist:
-            raise serializers.ValidationError("Customer not found.")
-
+        customer = validated_data.get('customer')
         items_data = validated_data.get('items', [])
         if not items_data:
             raise serializers.ValidationError("Invoice must have at least one item.")
@@ -75,19 +70,10 @@ class InvoiceSerializer(serializers.Serializer):
             })
 
         invoice = Invoice.objects.create(
-            customer=customer,  # OK now
+            customer=customer,
             items=processed_items,
             total=total_amount,
-            status=validated_data.get('status', 'Pending')
+            status='Pending'
         )
 
-        invoice_data = {
-            'id': invoice.id,
-            'ref_number': invoice.ref_number,
-            'customer': invoice.customer.id,
-            'items': invoice.items,
-            'total': invoice.total,
-            'status': invoice.status,
-            'created_at': invoice.created_at
-        }
-        return invoice_data
+        return invoice
