@@ -20,3 +20,9 @@ class CustomerSerializer(serializers.Serializer):
         instance.address = validated_data.get('address', instance.address)
         instance.save()
         return instance
+
+
+class ProductSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=50)
+    price = serializers.DecimalField(decimal_places=2, max_digits=10)
