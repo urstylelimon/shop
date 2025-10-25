@@ -4,10 +4,11 @@ from .models import *
 class CustomerSerializer(serializers.Serializer):
 
     id = serializers.IntegerField(read_only=True)
-    first_name = serializers.CharField(max_length=40)
-    last_name = serializers.CharField(max_length=40)
+    first_name = serializers.CharField(max_length=50)
+    last_name = serializers.CharField(max_length=50)
     email = serializers.EmailField()
     phone = serializers.CharField(max_length=11)
+    address = serializers.CharField(max_length=200)
 
     def create(self, validated_data):
         return Customer.objects.create(**validated_data)
