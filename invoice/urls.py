@@ -13,4 +13,5 @@ urlpatterns = [
     path('product_list/', views.product_list, name='product_list'),
 
     path('create_invoice/', views.create_invoice, name='create_invoice'),
+    path('all_invoice/', views.all_invoice, name='all_invoice'),
 ]
