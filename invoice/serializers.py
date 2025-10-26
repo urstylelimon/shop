@@ -21,7 +21,6 @@ class CustomerSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=50)
@@ -77,3 +76,13 @@ class InvoiceSerializer(serializers.Serializer):
         )
 
         return invoice
+
+    def update(self, instance, validated_data):
+
+        status_value = validated_data.get('status', instance.status)
+
+
+        if status_value == 'Paid' and instance.status != 'Paid':
+            instance.status = 'Paid'
+            instance.save()
+        return instance
