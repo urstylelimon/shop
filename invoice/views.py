@@ -109,8 +109,8 @@ def transaction(request):
     summary.update_totals()
 
     data = {
-        "total_sale": str(summary.total_sale),
-        "total_payment": str(summary.total_payment),
-        "total_receivable": str(summary.total_receivable),
+        "total_sale": f"{summary.total_sale:.2f}",
+        "total_payment": f"{summary.total_payment:.2f}",
+        "total_receivable": f"{summary.total_receivable:.2f}",
     }
     return Response(data, status=status.HTTP_200_OK)
