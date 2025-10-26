@@ -12,6 +12,7 @@ urlpatterns = [
     #Product Urls-------------------------------
     path('product_list/', views.product_list, name='product_list'),
 
+# Invoice--------------------------------------------------------------------------------------
     path('create_invoice/', views.create_invoice, name='create_invoice'),
     path('all_invoice/', views.all_invoice, name='all_invoice'),
     path('single_invoice/<int:pk>/', views.single_invoice, name = 'single_invoice'),
