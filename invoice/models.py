@@ -57,3 +57,20 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice {self.ref_number} ({self.customer.first_name})"
+
+
+
+
+class Transaction(models.Model):
+    total_sale = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    total_payment = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    total_receivable = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+
+    def update_totals(self):
+        self.total_sale = Invoice.objects.filter(status='Pending').aggregate(models.Sum('total'))['total__sum'] or Decimal('0.00')
+        self.total_payment = Invoice.objects.filter(status='Paid').aggregate(models.Sum('total'))['total__sum'] or Decimal('0.00')
+        self.total_receivable = self.total_sale + self.total_payment
+        self.save()
+
+    def __str__(self):
+        return f"Sale: {self.total_sale}, Payment: {self.total_payment}, Receivable: {self.total_receivable}"
