@@ -30,7 +30,7 @@ def single_customer(request, pk):
         serializer = CustomerSerializer(customer)
         return Response(serializer.data)
     elif request.method == 'PUT':
-        serializer = CustomerSerializer(customer, data=request.data)
+        serializer = CustomerSerializer(customer, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
