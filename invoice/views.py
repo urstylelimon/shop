@@ -15,6 +15,7 @@ from rest_framework.response import Response
 
 # This is for Customer-------------------------------------------------------------------
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_customer(request):
     serializer = CustomerSerializer(data=request.data)
     if serializer.is_valid():
@@ -28,6 +29,7 @@ def all_customer(request):
     serializer = CustomerSerializer(customers, many=True)
     return Response(serializer.data)
 @api_view(['GET','PUT'])
+@permission_classes([AllowAny])
 def single_customer(request, pk):
     customer = get_object_or_404(Customer, id=pk)
 
@@ -42,6 +44,7 @@ def single_customer(request, pk):
         return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
+@permission_classes([AllowAny])
 def delete_customer(request, pk):
     customer = get_object_or_404(Customer, id=pk)
     customer.delete()
@@ -50,6 +53,7 @@ def delete_customer(request, pk):
 
 #This is for Product--------------------------------------------------------------------------
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def product_list(request):
     products = Product.objects.all()
 
@@ -65,6 +69,7 @@ def product_list(request):
 
 #Invoice--------------------------------------------------------------------------------
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_invoice(request):
     serializer = InvoiceSerializer(data=request.data)
     if serializer.is_valid():
@@ -74,7 +79,7 @@ def create_invoice(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def all_invoice(request):
 
     invoices = Invoice.objects.all().order_by('-created_at')
@@ -83,7 +88,7 @@ def all_invoice(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def single_invoice(request, pk):
     try:
         invoice = Invoice.objects.get(pk=pk)
@@ -93,6 +98,7 @@ def single_invoice(request, pk):
     return Response(serializer.data)
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def update_invoice(request, pk):
     try:
         invoice = Invoice.objects.get(pk=pk)
@@ -110,6 +116,7 @@ def update_invoice(request, pk):
 #Transaction
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 
 def transaction(request):
     summary, created = Transaction.objects.get_or_create(id=1)
