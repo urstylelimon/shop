@@ -74,7 +74,7 @@ def create_invoice(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def all_invoice(request):
 
     invoices = Invoice.objects.all().order_by('-created_at')
@@ -83,6 +83,7 @@ def all_invoice(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def single_invoice(request, pk):
     try:
         invoice = Invoice.objects.get(pk=pk)
