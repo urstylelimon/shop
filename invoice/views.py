@@ -4,12 +4,12 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Customer
+from .models import *
 from .serializers import *
 from django.shortcuts import get_object_or_404
 
 
-# This is for Customer
+# This is for Customer-------------------------------------------------------------------
 @api_view(['POST'])
 def create_customer(request):
     serializer = CustomerSerializer(data=request.data)
@@ -43,7 +43,7 @@ def delete_customer(request, pk):
     return Response(status=204)
 
 
-#This is for Product
+#This is for Product--------------------------------------------------------------------------
 @api_view(['GET'])
 def product_list(request):
     products = Product.objects.all()
@@ -58,6 +58,7 @@ def product_list(request):
     return Response(serializer.data)
 
 
+#Invoice--------------------------------------------------------------------------------
 @api_view(['POST'])
 def create_invoice(request):
     serializer = InvoiceSerializer(data=request.data)
@@ -73,3 +74,43 @@ def all_invoice(request):
     invoices = Invoice.objects.all().order_by('-created_at')
     serializer = InvoiceSerializer(invoices, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def single_invoice(request, pk):
+    try:
+        invoice = Invoice.objects.get(pk=pk)
+    except Invoice.DoesNotExist:
+        return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+    serializer = InvoiceSerializer(invoice)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+def update_invoice(request, pk):
+    try:
+        invoice = Invoice.objects.get(pk=pk)
+    except Invoice.DoesNotExist:
+        return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = InvoiceSerializer(invoice, data=request.data, partial=True)
+    if serializer.is_valid():
+        updated_invoice = serializer.save()
+        return Response(InvoiceSerializer(updated_invoice).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+#Transaction
+
+@api_view(['GET'])
+
+def transaction(request):
+    summary, created = Transaction.objects.get_or_create(id=1)
+    summary.update_totals()
+
+    data = {
+        "total_sale": str(summary.total_sale),
+        "total_payment": str(summary.total_payment),
+        "total_receivable": str(summary.total_receivable),
+    }
+    return Response(data, status=status.HTTP_200_OK)
