@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.views.generic import TemplateView
 urlpatterns = [
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -23,4 +24,7 @@ urlpatterns = [
     path('single_invoice/<int:pk>/', views.single_invoice, name = 'single_invoice'),
     path('update_invoice/<int:pk>/', views.update_invoice, name='update_invoice'),
     path('transaction/', views.transaction, name='transaction'),
+
+
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
 ]
