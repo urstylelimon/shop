@@ -25,6 +25,5 @@ urlpatterns = [
     path('update_invoice/<int:pk>/', views.update_invoice, name='update_invoice'),
     path('transaction/', views.transaction, name='transaction'),
 
-
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
 ]
