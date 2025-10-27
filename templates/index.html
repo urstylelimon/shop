@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Invoice System</title>
+</head>
+<body>
+
+    <header>
+        <h1>Invoice System</h1>
+        <div id="userInfo" style="display:none;">
+            <span id="usernameDisplay"></span>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <div id="appContainer">
+
+        <div id="loginSection" class="page-section">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+        <div id="dashboard" class="page-section" style="display:none;">
+            <h2>Dashboard</h2>
+            <p>Welcome! Select an option below.</p>
+            
+            <div>
+                <button onclick="showSection('createCustomer')">Create Customer</button>
+                <button onclick="showSection('createInvoice')">Create Invoice</button>
+                <button onclick="showSection('customers')">View Customers</button>
+                <button onclick="showSection('products')">View Products</button>
+                <button onclick="showSection('invoices')">View Invoices</button>
+                <button onclick="showSection('transactions')">View Transactions</button>
+            </div>
+        </div>
+
+        <div id="createCustomer" class="page-section" style="display:none;">
+            <h2>Create Customer <button onclick="showSection('dashboard')">Back</button></h2>
+            <form id="customerForm">
+                <div>
+                    <label for="cFirstName">First Name</label>
+                    <input type="text" id="cFirstName" required>
+                </div>
+                <div>
+                    <label for="cLastName">Last Name</label>
+                    <input type="text" id="cLastName" required>
+                </div>
+                <div>
+                    <label for="cEmail">Email</label>
+                    <input type="email" id="cEmail">
+                </div>
+                <div>
+                    <label for="cPhone">Phone</label>
+                    <input type="text" id="cPhone" required>
+                </div>
+                <div>
+                    <label for="cAddress">Address</label>
+                    <input type="text" id="cAddress" required>
+                </div>
+                <button type="submit">Create Customer</button>
+            </form>
+        </div>
+
+        <div id="createInvoice" class="page-section" style="display:none;">
+            <h2>Create Invoice <button onclick="showSection('dashboard')">Back</button></h2>
+            <form id="invoiceForm">
+                <div>
+                    <label for="invoiceCustomer">Select Customer</label>
+                    <select id="invoiceCustomer" required>
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                </div>
+                
+                <hr>
+                
+                <div>
+                    <label>Invoice Items</label>
+                    <div id="invoiceItems">
+                        <div class="invoice-item-row">
+                            <select class="productSelect" required>
+                                <option value="">-- Select Product --</option>
+                            </select>
+                            <input type="number" class="productQty" placeholder="Quantity" min="1" value="1" required>
+                            <button type="button" class="remove-item-btn" onclick="removeInvoiceItem(this)">X</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addInvoiceItem()">+ Add Item</button>
+                </div>
+                
+                <hr>
+                
+                <button type="submit">Create Invoice</button>
+            </form>
+        </div>
+
+        <div id="customers" class="page-section" style="display:none;">
+            <h2>Customers <button onclick="showSection('dashboard')">Back</button></h2>
+            <button onclick="fetchCustomers()">Refresh List</button>
+            <table id="customerTable" border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="products" class="page-section" style="display:none;">
+            <h2>Products <button onclick="showSection('dashboard')">Back</button></h2>
+            <button onclick="fetchProducts()">Refresh List</button>
+            <table id="productTable" border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="invoices" class="page-section" style="display:none;">
+            <h2>Invoices <button onclick="showSection('dashboard')">Back</button></h2>
+            <button onclick="fetchInvoices()">Refresh List</button>
+            <table id="invoiceTable" border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ref Number</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="invoiceDetails" class="page-section" style="display:none;">
+            <h2>Invoice Details <button onclick="showSection('invoices')">Back to Invoices</button></h2>
+            <div id="invoiceDetailSummary">
+                <p><strong>Reference:</strong> <span id="detailInvoiceRef"></span></p>
+                <p><strong>Customer:</strong> <span id="detailCustomer"></span></p>
+                <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+                <p><strong>Total:</strong> <span id="detailTotal"></span></p>
+            </div>
+            
+            <h3>Items</h3>
+            <table id="detailInvoiceItems" border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="transactions" class="page-section" style="display:none;">
+            <h2>Transaction Summary <button onclick="showSection('dashboard')">Back</button></h2>
+            <button onclick="fetchTransactions()">Refresh Data</button>
+            <div id="transaction-summary-content">
+                <h3>Total Sales: <span id="totalSale">0.00</span></h3>
+                <h3>Total Payments: <span id="totalPayment">0.00</span></h3>
+                <h3>Total Receivable: <span id="totalReceivable">0.00</span></h3>
+            </div>
+        </div>
+
+    </div> <script>
+
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+
+        let accessToken = localStorage.getItem('access');
+        let currentUser = localStorage.getItem('currentUser');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setupEventListeners();
+        });
+
+        function checkAuthStatus() {
+            if (accessToken && currentUser) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('usernameDisplay').textContent = `Welcome, ${currentUser}`;
+            } else {
+                document.querySelectorAll('.page-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+            }
+        }
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('customerForm').addEventListener('submit', handleCreateCustomer);
+            document.getElementById('invoiceForm').addEventListener('submit', handleCreateInvoice);
+        }
+        
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            document.getElementById(sectionId).style.display = 'block';
+
+            if (sectionId === 'customers') fetchCustomers();
+            if (sectionId === 'products') fetchProducts();
+            if (sectionId === 'invoices') fetchInvoices();
+            if (sectionId === 'transactions') fetchTransactions();
+            if (sectionId === 'createInvoice') {
+                populateCustomerSelect();
+                populateProductsSelect();
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/token/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    accessToken = data.access;
+                    currentUser = username;
+                    
+                    localStorage.setItem('access', data.access);
+                    localStorage.setItem('refresh', data.refresh);
+                    localStorage.setItem('currentUser', username);
+                    
+                    checkAuthStatus();
+                } else {
+                    alert(data.detail || 'Login failed.');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            localStorage.removeItem('currentUser');
+            accessToken = null;
+            currentUser = null;
+            
+            checkAuthStatus();
+            
+            document.getElementById('loginForm').reset();
+        }
+        async function handleCreateCustomer(e) {
+            e.preventDefault();
+            
+            const customerData = {
+                first_name: document.getElementById('cFirstName').value,
+                last_name: document.getElementById('cLastName').value,
+                email: document.getElementById('cEmail').value,
+                phone: document.getElementById('cPhone').value,
+                address: document.getElementById('cAddress').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/create_customer/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(customerData)
+                });
+                
+                if (response.ok) {
+                    alert('Customer created successfully!');
+                    document.getElementById('customerForm').reset();
+                } else {
+                    const data = await response.json();
+                    alert('Failed to create customer: ' + (JSON.stringify(data)));
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        async function handleCreateInvoice(e) {
+            e.preventDefault();
+            
+            const customerId = document.getElementById('invoiceCustomer').value;
+            
+            const items = [];
+            document.querySelectorAll('.invoice-item-row').forEach(itemDiv => {
+                const productId = itemDiv.querySelector('.productSelect').value;
+                const quantity = itemDiv.querySelector('.productQty').value;
+                
+                if (productId && quantity) {
+                    items.push({ product: productId, quantity: parseInt(quantity) });
+                }
+            });
+            
+            if (items.length === 0) {
+                alert('Please add at least one item.');
+                return;
+            }
+            
+            const invoiceData = { customer: customerId, items: items };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/create_invoice/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(invoiceData)
+                });
+                
+                if (response.ok) {
+                    alert('Invoice created successfully!');
+                    document.getElementById('invoiceForm').reset();
+                    const invoiceItems = document.getElementById('invoiceItems');
+                    invoiceItems.innerHTML = `
+                        <div class="invoice-item-row">
+                            <select class="productSelect" required>
+                                <option value="">-- Select Product --</option>
+                            </select>
+                            <input type="number" class="productQty" placeholder="Quantity" min="1" value="1" required>
+                            <button type="button" class="remove-item-btn" onclick="removeInvoiceItem(this)">X</button>
+                        </div>
+                    `;
+                    populateProductsSelect();
+                } else {
+                    const data = await response.json();
+                    alert('Failed to create invoice: ' + (JSON.stringify(data)));
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+        
+        async function fetchCustomers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/all_customer/`);
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#customerTable tbody');
+                tbody.innerHTML = '';
+                
+                data.forEach(customer => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${customer.id}</td>
+                            <td>${customer.first_name}</td>
+                            <td>${customer.last_name}</td>
+                            <td>${customer.email}</td>
+                            <td>${customer.phone}</td>
+                            <td>${customer.address}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                alert('Failed to fetch customers');
+            }
+        }
+        
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/product_list/`);
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#productTable tbody');
+                tbody.innerHTML = '';
+                
+                data.forEach(product => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>$${product.price}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                alert('Failed to fetch products');
+            }
+        }
+        
+        async function fetchInvoices() {
+            if (!accessToken) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/all_invoice/`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                
+                if (response.status === 401) {
+                    handleLogout();
+                    return;
+                }
+                
+                const data = await response.json();
+                const tbody = document.querySelector('#invoiceTable tbody');
+                tbody.innerHTML = '';
+                
+                data.forEach(invoice => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${invoice.id}</td>
+                            <td>${invoice.ref_number}</td>
+                            <td>${invoice.customer}</td>
+                            <td>$${invoice.total}</td>
+                            <td>${invoice.status}</td>
+                            <td>
+                                <button onclick="viewInvoice(${invoice.id})">View</button>
+                                ${invoice.status === 'Pending' ? 
+                                    `<button onclick="markPaid(${invoice.id})">Mark Paid</button>` : 
+                                    ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                alert('Failed to fetch invoices');
+            }
+        }
+
+        async function viewInvoice(invoiceId) {
+            if (!accessToken) {
+                alert('Please login to view details.');
+                return;
+            }
+            
+            showSection('invoiceDetails');
+            
+            const itemsTbody = document.querySelector('#detailInvoiceItems tbody');
+            itemsTbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/single_invoice/${invoiceId}/`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                
+                if (response.status === 401) {
+                    alert('Session expired. Please login again.');
+                    handleLogout();
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('detailInvoiceRef').textContent = data.ref_number;
+                    document.getElementById('detailCustomer').textContent = data.customer; 
+                    document.getElementById('detailStatus').textContent = data.status;
+                    document.getElementById('detailTotal').textContent = `$${data.total}`;
+                    
+                    itemsTbody.innerHTML = '';
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(item => {
+                            itemsTbody.innerHTML += `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>$${item.price}</td>
+                                    <td>$${item.total}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        itemsTbody.innerHTML = '<tr><td colspan="4">No items found.</td></tr>';
+                    }
+                    
+                } else {
+                    throw new Error(data.detail || 'Failed to load details');
+                }
+                
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                itemsTbody.innerHTML = '<tr><td colspan="4">Error loading items.</td></tr>';
+            }
+        }
+        
+        async function markPaid(invoiceId) {
+            if (!accessToken) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/update_invoice/${invoiceId}/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ status: 'Paid' })
+                });
+                
+                if (response.ok) {
+                    alert('Invoice marked as Paid.');
+                    fetchInvoices();
+                    fetchTransactions();
+                } else {
+                    alert('Failed to update invoice');
+                }
+            } catch (error) {
+                alert('Failed to update invoice status');
+            }
+        }
+        
+        async function fetchTransactions() {
+            if (!accessToken) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/transaction/`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                
+                if (response.status === 401) {
+                    handleLogout();
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('totalSale').textContent = `${data.total_sale}`;
+                document.getElementById('totalPayment').textContent = `${data.total_payment}`;
+                document.getElementById('totalReceivable').textContent = `${data.total_receivable}`;
+            } catch (error) {
+                alert('Failed to fetch transaction data');
+            }
+        }
+        
+        async function populateCustomerSelect() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/all_customer/`);
+                const data = await response.json();
+                
+                const select = document.getElementById('invoiceCustomer');
+                select.innerHTML = '<option value="">-- Select Customer --</option>';
+                
+                data.forEach(customer => {
+                    select.innerHTML += `<option value="${customer.id}">${customer.first_name} ${customer.last_name}</option>`;
+                });
+            } catch (error) {
+                console.error('Populate customer select error:', error);
+            }
+        }
+        
+        async function populateProductsSelect() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/product_list/`);
+                const data = await response.json();
+                
+                document.querySelectorAll('.productSelect').forEach(select => {
+                    const currentVal = select.value;
+                    select.innerHTML = '<option value="">-- Select Product --</option>';
+                    
+                    data.forEach(product => {
+                        select.innerHTML += `<option value="${product.id}">${product.name} - $${product.price}</option>`;
+                    });
+                    select.value = currentVal;
+                });
+            } catch (error) {
+                console.error('Populate products select error:', error);
+            }
+        }
+
+        function addInvoiceItem() {
+            const invoiceItems = document.getElementById('invoiceItems');
+
+            const newItem = document.createElement('div');
+            newItem.className = 'invoice-item-row';
+            
+            newItem.innerHTML = `
+                <select class="productSelect" required>
+                    <option value="">-- Select Product --</option>
+                </select>
+                <input type="number" class="productQty" placeholder="Quantity" min="1" value="1" required>
+                <button type="button" class="remove-item-btn" onclick="removeInvoiceItem(this)">X</button>
+            `;
+            invoiceItems.appendChild(newItem);
+
+            populateProductsSelect();
+        }
+        
+
+        function removeInvoiceItem(button) {
+
+            const itemDiv = button.parentElement;
+
+            if (document.querySelectorAll('.invoice-item-row').length > 1) {
+                itemDiv.remove();
+            } else {
+                alert("You must have at least one item.");
+            }
+        }
+    </script>
+</body>
+</html>
